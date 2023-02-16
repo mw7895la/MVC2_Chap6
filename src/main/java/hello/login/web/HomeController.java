@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.GetMapping;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
 
 
 @Slf4j
@@ -48,7 +49,7 @@ public class HomeController {
     /**
      * 위에 homeLogin은 쿠키로 받는것. 아래는 세션이다.
      */
-    @GetMapping("/")
+    //@GetMapping("/")
     public String homeLoginV2(HttpServletRequest request, Model model){
 
         //세션 관리자에 저장된 회원 정보 조회
@@ -58,6 +59,32 @@ public class HomeController {
             return "home";
         }
         model.addAttribute("member", member);
+        return "loginHome";         //사용자 전용 화면
+    }
+
+
+    /**
+     * 서블릿 세션을 이용한 홈로그인
+     */
+    @GetMapping("/")
+    public String homeLoginV3(HttpServletRequest request, Model model){
+        //처음 들어온 사용자도. 홈 화면에(회원가입 로그인) 들어왔는데 세션이 만들어져버려.. 그래서 일단은 false ..
+        //세션은 메모리를 쓰기 때문에 꼭 필요할때만 생성.
+        HttpSession session = request.getSession(false);
+
+        if(session==null){
+            return "home";
+        }
+        Member loginMember = (Member)session.getAttribute(SessionConst.LOGIN_MEMBER);       //해당 session key로 얻은  member 객체를 캐스팅
+
+        //세션에 회원 데이터가 없으면 home
+        if(loginMember==null){
+            return "home";
+        }
+
+        //세션이 유지되면 로그인으로 이동
+
+        model.addAttribute("member", loginMember);
         return "loginHome";         //사용자 전용 화면
     }
 }
