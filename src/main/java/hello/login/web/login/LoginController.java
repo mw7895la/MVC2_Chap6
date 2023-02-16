@@ -2,6 +2,7 @@ package hello.login.web.login;
 
 import hello.login.domain.login.LoginService;
 import hello.login.domain.member.Member;
+import hello.login.web.session.SessionManager;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
@@ -12,6 +13,7 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 
 import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 @Slf4j
@@ -20,6 +22,7 @@ import javax.servlet.http.HttpServletResponse;
 public class LoginController {
 
     private final LoginService loginService;
+    private final SessionManager sessionManager;
 
     @GetMapping("/login")
     public String loginForm(@ModelAttribute("loginForm") LoginForm form) {
@@ -27,7 +30,7 @@ public class LoginController {
     }
 
     //실제 로그인 처리 되는 로직
-    @PostMapping("/login")
+    //@PostMapping("/login")
     public String login(@Validated @ModelAttribute LoginForm form, BindingResult bindingResult, HttpServletResponse response) {
         if (bindingResult.hasErrors()) {
             return "login/loginForm";
@@ -53,7 +56,33 @@ public class LoginController {
         return "redirect:/";
     }
 
-    @PostMapping("/logout")
+    /**
+     * 세션을 이용한 로그인 처리
+     */
+    @PostMapping("/login")
+    public String loginV2(@Validated @ModelAttribute LoginForm form, BindingResult bindingResult, HttpServletResponse response) {
+        if (bindingResult.hasErrors()) {
+            return "login/loginForm";
+        }
+
+        Member loginMember = loginService.login(form.getLoginId(), form.getPassword());
+
+        log.info("loginMameber ={}", loginMember);
+        //특정 필드의 문제가 아님.  reject()하면 글로벌 오류.  글로벌 오류는 자바코드로 작성하는게 좋다
+        if (loginMember == null) {
+            bindingResult.reject("loginFail", "아이디 또는 비밀번호가 맞지 않습니다.");
+            return "login/loginForm";
+        }
+
+        //로그인 성공 처리
+        //세션 관리자를 통해 세션을 생성하고 회원 데이터를 보관
+        sessionManager.createSession(loginMember, response);
+
+
+        return "redirect:/";
+    }
+
+    //@PostMapping("/logout")
     public String logout(HttpServletResponse response) {
         //쿠키를 지우는 방법 시간을 지워라
 
@@ -62,6 +91,15 @@ public class LoginController {
         response.addCookie(cookie); 을 추출함*/
 
         expireCookie(response,"memberId");
+        return "redirect:/";
+    }
+
+    /**
+     * 로그아웃시 세션이 만료됨.
+     */
+    @PostMapping("/logout")
+    public String logoutV2(HttpServletRequest request) {
+        sessionManager.expire(request);
         return "redirect:/";
     }
 
