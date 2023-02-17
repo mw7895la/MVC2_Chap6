@@ -1,6 +1,7 @@
 package hello.login;
 
 import hello.login.web.filter.LogFilter;
+import hello.login.web.filter.LoginCheckFilter;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -24,4 +25,15 @@ public class WebConfig {
     }
 
 
+
+    @Bean
+    public FilterRegistrationBean loginCheckFilter(){
+        //스프링 부트로 사용할때 필터 이렇게 등록하면 된다.  스프링부트는 WAS를 자기가 들고 띄우기 떄문에 WAS를 띄울때 필터를 같이 넣어준다.
+
+        FilterRegistrationBean<Filter> filterFilterRegistrationBean = new FilterRegistrationBean<>();
+        filterFilterRegistrationBean.setFilter(new LoginCheckFilter());             //우리가 만든 필터(web/filter/LoginCheckFilter.java)
+        filterFilterRegistrationBean.setOrder(2);                                //필터가 체인으로 여러개 들어갈수 있으니 순서 정해주자.
+        filterFilterRegistrationBean.addUrlPatterns("/*");                       // 어떤 url 패턴에다가 적용할지. 전체를 적용하지만 LoginCheckFilter에서 적용시킬 화이트 리스트 빼고는 나머진 로그인 인증 체크 다 할꺼다.
+        return filterFilterRegistrationBean;
+    }
 }

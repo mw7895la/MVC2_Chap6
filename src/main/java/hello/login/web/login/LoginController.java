@@ -12,11 +12,14 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+
+import static com.fasterxml.jackson.databind.util.ClassUtil.defaultValue;
 
 @Slf4j
 @Controller
@@ -87,7 +90,7 @@ public class LoginController {
     /**
      * HttpServlet이 제공하는 세션으로 해보자.
      */
-    @PostMapping("/login")
+    //@PostMapping("/login")
     public String loginV3(@Validated @ModelAttribute LoginForm form, BindingResult bindingResult, HttpServletRequest request) {
         if (bindingResult.hasErrors()) {
             return "login/loginForm";
@@ -110,6 +113,33 @@ public class LoginController {
         session.setAttribute(SessionConst.LOGIN_MEMBER,loginMember);        //서블릿은 통일된 인터페이스를 제공한다. setAttribute 뭔가 보관해 !
 
         return "redirect:/";
+    }
+
+    @PostMapping("/login")
+    public String loginV4(@Validated @ModelAttribute LoginForm form,
+                          BindingResult bindingResult,
+                          @RequestParam(defaultValue = "/") String redirectURL,
+                          HttpServletRequest request) {
+
+        if (bindingResult.hasErrors()) {
+            return "login/loginForm";
+        }
+
+        Member loginMember = loginService.login(form.getLoginId(), form.getPassword());
+
+        log.info("loginMameber ={}", loginMember);
+
+        if (loginMember == null) {
+            bindingResult.reject("loginFail", "아이디 또는 비밀번호가 맞지 않습니다.");
+            return "login/loginForm";
+        }
+
+
+        HttpSession session = request.getSession();
+        //세션에 로그인 회원 정보 보관
+        session.setAttribute(SessionConst.LOGIN_MEMBER,loginMember);
+
+        return "redirect:"+redirectURL;     //넘어온 url 파라미터가 없으면 defaultValue의 /가 붙는다.
     }
 
     //@PostMapping("/logout")
