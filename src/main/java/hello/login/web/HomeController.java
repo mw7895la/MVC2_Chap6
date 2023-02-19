@@ -2,6 +2,7 @@ package hello.login.web;
 
 import hello.login.domain.member.Member;
 import hello.login.domain.member.MemberRepository;
+import hello.login.web.argumentresolver.Login;
 import hello.login.web.session.SessionManager;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -89,7 +90,7 @@ public class HomeController {
         return "loginHome";         //사용자 전용 화면
     }
 
-    @GetMapping("/")
+    //@GetMapping("/")
     public String homeLoginV3Spring(@SessionAttribute(name = SessionConst.LOGIN_MEMBER, required=false)Member loginMember, Model model){
         /**
          * 아래를 이 한줄로 줄인다. @SessionAttribute(name = SessionConst.LOGIN_MEMBER, required=false)Member loginMember
@@ -103,6 +104,20 @@ public class HomeController {
         Member loginMember = (Member)session.getAttribute(SessionConst.LOGIN_MEMBER);*/
 
 
+
+        //세션에 회원 데이터가 없으면 home
+        if(loginMember==null){
+            return "home";
+        }
+
+        //세션이 유지되면 로그인으로 이동
+
+        model.addAttribute("member", loginMember);
+        return "loginHome";         //사용자 전용 화면
+    }
+
+    @GetMapping("/")//@Login 어노테이션을 우리가 직접 만들었따.    @Login이 뭔지 인식 못하기때문에 처음엔 @ModelAttribute처럼 동작해서 null이 찍힌다.
+    public String homeLoginV3ArgumentResolver(@Login Member loginMember, Model model){
 
         //세션에 회원 데이터가 없으면 home
         if(loginMember==null){

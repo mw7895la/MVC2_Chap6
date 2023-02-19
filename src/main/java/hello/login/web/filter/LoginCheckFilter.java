@@ -12,7 +12,7 @@ import java.io.IOException;
 
 @Slf4j
 public class LoginCheckFilter implements Filter {
-    private static final String[] whitelist = {"/", "/members", "/login", "/logout", "/css/*"};     //로그인 안됬다고 css호출 안되면 안됨..
+    private static final String[] whitelist = {"/", "/members/add", "/login", "/logout", "/css/*"};     //로그인 안됬다고 css호출 안되면 안됨..
 
     /**
      * init()과 destroy()는 Filter 인터페이스에서 default로 되어있기 때문에 굳이 구현을 안해도 된다. 그래서 지웠다.
