@@ -40,7 +40,7 @@ public class LoginMemberArgumentResolver implements HandlerMethodArgumentResolve
             return null;
         }
 
-        return session.getAttribute(SessionConst.LOGIN_MEMBER);     //세션이 있으면 파라미터로 호출된 Member가 넘어간다.
+        return session.getAttribute(SessionConst.LOGIN_MEMBER);     //세션이 있으면  homeLoginV3ArgumentResolver()의 파라미터로, 호출된 Member가 넘어간다.
 
     }
 }

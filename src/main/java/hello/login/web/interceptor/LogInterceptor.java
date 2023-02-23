@@ -50,7 +50,7 @@ public class LogInterceptor implements HandlerInterceptor {
         String requestURI = request.getRequestURI();
 
         Object logId = request.getAttribute(LOG_ID);   //preHandle에서 set한걸 get한다.  HttpServletRequest는 하나의 사용자에 대해서 갔다가 오는것 까지. 보장이 되니까.
-        log.info("REQUEST [{}] [{}] [{}]",logId,requestURI,handler);
+        log.info("Response [{}] [{}] [{}]",logId,requestURI,handler);
 
         //예외가 터진 경우
         if(ex != null){
